@@ -1,0 +1,2754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delhivery Last-Mile Delay Intelligence — Light-Black Cinematic Edition</title>
+<meta name="description" content="An interactive machine learning pipeline that predicts delivery hours, flags parcels likely to miss their promise, and audits all 24 Delhivery hubs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --bg-soft: #e8edf7;
+  --surface: #ffffff;
+  --fg: #0f172a;
+  --fg-secondary: #1e293b;
+  --mut: #334155;
+  --dim: #475569;
+  --card: rgba(255, 255, 255, 0.90);
+  --card-strong: rgba(255, 255, 255, 0.96);
+  --line: rgba(15, 23, 42, 0.12);
+  --line-bright: rgba(15, 23, 42, 0.18);
+  --blue: #0066cc;
+  --cyan: #0284c7;
+  --purple: #6d28d9;
+  --g: #15803d;
+  --o: #b45309;
+  --r: #be123c;
+  --shadow-lg: 0 22px 54px -12px rgba(15, 23, 42, 0.10), 0 4px 18px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 6px 20px rgba(15, 23, 42, 0.07);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(0, 102, 204, 0.18);
+  color: var(--fg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   LIGHT CINEMATIC ATMOSPHERE, VOLUMETRIC SHADES & GRAIN
+   ========================================================= */
+#scroll-laser {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--blue), var(--purple), var(--r));
+  box-shadow: 0 2px 12px rgba(0, 102, 204, 0.35);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.bg-cinema {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 0%, #ffffff 0%, #f1f5fc 58%, #e4ebf7 100%);
+}
+.bg-cinema .orb {
+  position: absolute;
+  width: 62vmax;
+  height: 62vmax;
+  border-radius: 50%;
+  filter: blur(95px);
+  opacity: 0.65;
+  animation: drift 24s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.bg-cinema .orb-1 {
+  background: radial-gradient(circle, #c3dcff 0%, transparent 70%);
+  top: -22vmax;
+  left: -14vmax;
+}
+.bg-cinema .orb-2 {
+  background: radial-gradient(circle, #dfd0ff 0%, transparent 70%);
+  top: 18vmax;
+  right: -20vmax;
+  animation-duration: 30s;
+  animation-delay: -7s;
+}
+.bg-cinema .orb-3 {
+  background: radial-gradient(circle, #ffd9bf 0%, transparent 70%);
+  bottom: -24vmax;
+  left: 16vmax;
+  opacity: 0.55;
+  animation-duration: 34s;
+  animation-delay: -14s;
+}
+
+/* Subtle Anamorphic Daylight Sheen */
+.anamorphic-streak {
+  position: fixed;
+  top: 44%;
+  left: -10%;
+  right: -10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 5%, rgba(0, 102, 204, 0.16) 35%, rgba(15, 23, 42, 0.12) 50%, rgba(109, 40, 217, 0.16) 65%, transparent 95%);
+  filter: blur(1px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes drift {
+  to { transform: translate(7vmax, 5vmax) scale(1.12); }
+}
+
+/* Soft Cinematic Vignette & Fine Paper/Film Texture */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  background: radial-gradient(125% 100% at 50% 45%, transparent 64%, rgba(15, 23, 42, 0.07) 100%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 26;
+  pointer-events: none;
+  opacity: 0.03;
+  mix-blend-mode: multiply;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =========================================================
+   TOP NAVIGATION BAR & STYLISH BOLD LABELS WITH ()
+   ========================================================= */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 max(24px, calc(50% - 600px));
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line-bright);
+  font-size: 13.5px;
+  color: var(--fg);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+.brand-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--r);
+  box-shadow: 0 0 10px rgba(190, 18, 60, 0.55);
+  animation: pulseDot 2.2s infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.65; }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--mut);
+}
+.nav-links a {
+  padding: 6px 10px;
+  border-radius: 99px;
+  color: var(--fg-secondary);
+  transition: all 0.2s ease;
+}
+.nav-links a:hover {
+  color: var(--blue);
+  background: rgba(15, 23, 42, 0.06);
+}
+.nav-links a b {
+  font-weight: 800;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+.nav-links a span {
+  font: 600 11.5px var(--font-mono);
+  color: var(--mut);
+  margin-left: 3px;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pill-btn {
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  color: var(--fg);
+  padding: 6px 13px;
+  border-radius: 99px;
+  font: 700 11.5px var(--font-mono);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+.pill-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  transform: translateY(-1px);
+}
+.pill-btn.active {
+  background: rgba(0, 102, 204, 0.10);
+  border-color: rgba(0, 102, 204, 0.45);
+  color: var(--blue);
+}
+
+@media (max-width: 980px) {
+  .nav-links a:nth-child(n+6) { display: none; }
+  .nav-links { gap: 8px; }
+}
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+}
+
+/* =========================================================
+   STYLISH SECTION TAGS: BOLD MAIN WORD + (Part X)
+   ========================================================= */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
+  font-size: 13.5px;
+  color: var(--fg);
+}
+.tag strong {
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(95deg, #0055b3 0%, #6d28d9 55%, #be123c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.tag .part-paren {
+  font: 700 12.5px var(--font-mono);
+  color: var(--mut);
+}
+
+/* =========================================================
+   LAYOUT & TYPOGRAPHY (HIGH-CONTRAST DARK INK)
+   ========================================================= */
+.w {
+  max-width: 1180px;
+  margin: auto;
+  padding: 0 24px;
+}
+
+section {
+  padding: 120px 0;
+  position: relative;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+  color: var(--fg);
+}
+h1 {
+  font-size: clamp(42px, 7.6vw, 94px);
+}
+h2 {
+  font-size: clamp(32px, 5vw, 60px);
+  max-width: 15.5em;
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(24px);
+  transition: opacity 0.95s, filter 0.95s, transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+}
+h2.in {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
+.g {
+  background: linear-gradient(95deg, #0055b3 0%, #6d28d9 52%, #be123c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lead {
+  color: var(--mut);
+  font-size: clamp(17px, 1.9vw, 21px);
+  max-width: 36em;
+  margin-top: 18px;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+code {
+  font-family: var(--font-mono);
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--fg);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.92em;
+}
+
+/* =========================================================
+   HERO & SPACIOUS INTERACTIVE 3D 24-HUB SPHERE STAGE (#top)
+   ========================================================= */
+#top {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 108px 0 80px;
+}
+
+.hero-header {
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px;
+  border-radius: 99px;
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  box-shadow: var(--shadow-sm);
+  font: 700 11.5px var(--font-mono);
+  color: var(--mut);
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+}
+.hero-badge span {
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.ln {
+  display: block;
+  overflow: hidden;
+  padding: 0 0.04em 0.08em;
+}
+.ln > span {
+  display: inline-block;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(108%);
+  filter: blur(12px);
+  animation: heroUp 1.25s cubic-bezier(0.16, 0.84, 0.24, 1) 0.08s forwards;
+}
+.ln:nth-child(2) > span { animation-delay: 0.22s; }
+.ln:nth-child(3) > span { animation-delay: 0.36s; }
+
+@keyframes heroUp {
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* Interactive Sphere Command Stage — Spacious & Unobstructed */
+.sphere-command-wrap {
+  width: 100%;
+  max-width: 1160px;
+  margin: 22px auto 34px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 960px) {
+  .sphere-command-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sphere-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(440px, 56vh, 540px);
+  border-radius: 32px;
+  background: radial-gradient(circle at 50% 52%, #ffffff 0%, #eef3fb 66%, #e0e8f6 100%);
+  border: 1px solid var(--line-bright);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 #ffffff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#g {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+#g:active {
+  cursor: grabbing;
+}
+
+/* Top-left & Top-right Controls inside Sphere Stage */
+.sphere-hud-top {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+.sphere-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: auto;
+}
+.sf-btn {
+  padding: 6px 12px;
+  border-radius: 99px;
+  font: 700 11px var(--font-mono);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line-bright);
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.18s;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+.sf-btn:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+.sf-btn.active {
+  background: var(--fg);
+  color: #ffffff;
+  border-color: var(--fg);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.22);
+}
+.sphere-hint {
+  font: 700 11px var(--font-mono);
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 6px 13px;
+  border-radius: 99px;
+  border: 1px solid var(--line-bright);
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+.sphere-hint:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+/* Hub Telemetry Inspector Card (Right of Sphere) */
+.hub-inspector {
+  background: var(--card-strong);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--line-bright);
+  border-radius: 28px;
+  padding: 26px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+  color: var(--fg);
+}
+.hi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-bright);
+}
+.hi-id {
+  font: 700 12px var(--font-mono);
+  color: var(--blue);
+  letter-spacing: 0.06em;
+}
+.hi-city {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-top: 2px;
+  color: var(--fg);
+}
+.hi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+.hi-stat {
+  background: #f8fafc;
+  border: 1px solid var(--line-bright);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.hi-stat span {
+  display: block;
+  font: 700 10.5px var(--font-mono);
+  color: var(--mut);
+  text-transform: uppercase;
+}
+.hi-stat strong {
+  display: block;
+  font: 800 19px var(--font-mono);
+  margin-top: 3px;
+  color: var(--fg);
+}
+.hi-status {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.48;
+  background: rgba(21, 128, 61, 0.08);
+  border: 1px solid rgba(21, 128, 61, 0.28);
+  color: var(--fg);
+}
+
+/* Dedicated Below-Sphere Footer Zone (Well Spaced, Zero Crowding) */
+.hero-footer {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  margin-top: 12px;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.key {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  font: 700 12.5px var(--font-mono);
+  color: var(--fg);
+  flex-wrap: wrap;
+}
+.key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
+  border-radius: 99px;
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  color: var(--fg);
+  box-shadow: var(--shadow-sm);
+}
+.key i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, var(--blue), #004999);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 10px 26px rgba(0, 102, 204, 0.28);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(0, 102, 204, 0.38);
+}
+.cta-sec {
+  background: #ffffff;
+  color: var(--fg);
+  border: 1px solid var(--line-bright);
+  box-shadow: var(--shadow-sm);
+}
+.cta-sec:hover {
+  background: #f8fafc;
+  color: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+}
+
+/* Floating Globe Hover Tooltip (High-Contrast Dark Ink on White Card) */
+#globe-tip {
+  position: fixed;
+  z-index: 65;
+  pointer-events: none;
+  background: #ffffff;
+  border: 1.5px solid var(--fg);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font: 700 12px var(--font-mono);
+  color: var(--fg);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.20);
+  opacity: 0;
+  transform: translate(-50%, -130%);
+  transition: opacity 0.14s ease;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   TINY INTERACTIVE ROBOT COMPANION (#mini-bot)
+   ========================================================= */
+#mini-bot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 54px;
+  height: 54px;
+  z-index: 80;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  will-change: transform;
+  filter: drop-shadow(0 8px 16px rgba(15, 23, 42, 0.22));
+}
+#bot-bubble {
+  position: absolute;
+  bottom: 58px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  font: 700 10.5px var(--font-mono);
+  padding: 5px 11px;
+  border-radius: 99px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+#bot-bubble.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+.bot-thruster {
+  transform-origin: 27px 45px;
+  animation: thrustFlicker 0.18s infinite alternate;
+}
+#mini-bot.perched .bot-thruster {
+  opacity: 0;
+}
+@keyframes thrustFlicker {
+  from { transform: scaleY(0.85); opacity: 0.75; }
+  to { transform: scaleY(1.25); opacity: 1; }
+}
+
+/* =========================================================
+   CINEMATIC STORY SCRUBBING (#story)
+   ========================================================= */
+#story {
+  margin-top: 40px;
+  height: 220vh;
+  padding: 0;
+}
+#story .w {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.scrub {
+  font-size: clamp(28px, 4.8vw, 62px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.13;
+  max-width: 16em;
+  color: var(--fg);
+}
+.scrub span {
+  color: #94a3b8;
+  transition: color 0.35s;
+}
+.scrub span.on {
+  color: var(--fg);
+}
+
+.sla-timeline {
+  margin-top: 44px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-width: 840px;
+}
+.sla-node {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line-bright);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.35s ease;
+  opacity: 0.65;
+  color: var(--fg);
+}
+.sla-node.active {
+  opacity: 1;
+  background: #ffffff;
+  border-color: var(--blue);
+  box-shadow: 0 12px 30px rgba(0, 102, 204, 0.14);
+  transform: translateY(-3px);
+}
+.sla-node strong {
+  display: block;
+  font: 800 22px var(--font-mono);
+  color: var(--fg);
+}
+.sla-node span {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--mut);
+}
+
+/* =========================================================
+   GLASSMORPHIC CARDS, STATS & PANELS
+   ========================================================= */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: var(--line-bright);
+  border: 1px solid var(--line-bright);
+  border-radius: 28px;
+  overflow: hidden;
+  margin-top: 52px;
+  box-shadow: var(--shadow-lg);
+}
+.stats > div {
+  background: #ffffff;
+  padding: 36px 26px;
+}
+.stats strong {
+  display: block;
+  font-size: clamp(38px, 5vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--fg);
+}
+.stats span {
+  color: var(--mut);
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-top: 10px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 22px;
+  margin-top: 48px;
+}
+
+.card, .panel {
+  position: relative;
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 #ffffff;
+  border: 1px solid var(--line-bright);
+  border-radius: 28px;
+  padding: 34px;
+  overflow: hidden;
+  color: var(--fg);
+  transition: transform 0.2s ease-out, border-color 0.25s;
+}
+.card:hover {
+  border-color: rgba(0, 102, 204, 0.45);
+}
+
+.card h3 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+  margin-bottom: 10px;
+  color: var(--fg);
+}
+.card p {
+  color: var(--mut);
+  font-size: 15px;
+  font-weight: 500;
+}
+.card .n {
+  font-size: 54px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+
+.panel {
+  border-radius: 32px;
+  padding: clamp(26px, 4.5vw, 52px);
+  margin-top: 48px;
+}
+
+.rise {
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+
+/* =========================================================
+   DATA (Part A) PIPELINE & BREAKDOWN
+   ========================================================= */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 26px 34px;
+  counter-reset: s;
+  list-style: none;
+}
+.steps li {
+  counter-increment: s;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-bright);
+  color: var(--mut);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.steps li::before {
+  content: "STEP 0" counter(s);
+  display: block;
+  color: var(--blue);
+  font: 800 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.steps b {
+  color: var(--fg);
+  display: block;
+  font-size: 16.5px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.sub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 22px;
+  margin-top: 34px;
+}
+.mini-box {
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  border-radius: 22px;
+  padding: 24px;
+  color: var(--fg);
+}
+.mini-box h4 {
+  font: 800 11.5px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mut);
+  margin-bottom: 14px;
+}
+
+/* =========================================================
+   HOURS (Part B) MODEL BARS
+   ========================================================= */
+.row {
+  display: grid;
+  grid-template-columns: minmax(140px, 230px) 1fr 78px;
+  gap: 16px;
+  align-items: center;
+  padding: 15px 0;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.row:first-child { border: 0; }
+.row .t {
+  height: 11px;
+  background: rgba(15, 23, 42, 0.09);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bar.in {
+  width: var(--w);
+}
+.row em {
+  font: 800 14.5px var(--font-mono);
+  text-align: right;
+  font-style: normal;
+  color: var(--fg);
+}
+
+/* =========================================================
+   ALERTS (Part C) GAUGE & NOISE FILTER
+   ========================================================= */
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 44px;
+  align-items: center;
+}
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gauge {
+  width: min(100%, 310px);
+  display: block;
+}
+.gauge circle {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 70px 70px;
+}
+.gauge .bg-ring { stroke: rgba(15, 23, 42, 0.10); }
+.gauge .a, .gauge .b {
+  transition: stroke-dasharray 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gauge .a { stroke: var(--o); stroke-dasharray: 0 400; }
+.gauge.in .a { stroke-dasharray: 285 400; }
+.gauge .b { stroke: var(--blue); stroke-dasharray: 0 400; }
+.gauge.in .b { stroke-dasharray: 199 400; }
+.gauge text {
+  fill: var(--fg);
+  text-anchor: middle;
+  font-weight: 800;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+.kv div {
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  border-radius: 18px;
+  padding: 18px;
+}
+.kv strong {
+  display: block;
+  font: 800 26px var(--font-mono);
+  letter-spacing: -0.03em;
+  color: var(--fg);
+}
+.kv span {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mut);
+}
+
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.f-pill {
+  padding: 5px 12px;
+  border-radius: 99px;
+  font: 700 12px var(--font-mono);
+  background: rgba(21, 128, 61, 0.10);
+  border: 1px solid rgba(21, 128, 61, 0.35);
+  color: var(--g);
+}
+.f-pill.noise {
+  background: rgba(190, 18, 60, 0.08);
+  border-color: rgba(190, 18, 60, 0.30);
+  color: var(--r);
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
+/* =========================================================
+   HUBS (Part D) SEGMENTS & MISMATCH TABLE
+   ========================================================= */
+.seg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 48px;
+}
+.seg .card strong {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  display: block;
+  line-height: 1;
+}
+.scroll { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  min-width: 580px;
+  color: var(--fg);
+}
+th {
+  color: var(--mut);
+  font: 800 11.5px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  text-align: left;
+  padding: 14px 12px;
+  border-bottom: 1.5px solid var(--line-bright);
+}
+td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+  font-weight: 500;
+}
+tr:last-child td { border: 0; }
+tr:hover td {
+  background: rgba(0, 102, 204, 0.04);
+}
+.p {
+  padding: 4px 11px;
+  border-radius: 99px;
+  font: 700 12px var(--font-mono);
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   LIVE DISPATCH TELEMETRY SIMULATOR (#simulator)
+   ========================================================= */
+.sim-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  align-items: stretch;
+}
+@media (max-width: 860px) {
+  .sim-grid { grid-template-columns: 1fr; }
+}
+.sim-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 560px) {
+  .sim-controls { grid-template-columns: 1fr; }
+}
+.sim-field {
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: var(--fg);
+}
+.sim-field label {
+  display: flex;
+  justify-content: space-between;
+  font: 800 11px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mut);
+  margin-bottom: 10px;
+}
+.sim-field label b {
+  color: var(--blue);
+}
+.sim-field select, .sim-field input[type="range"] {
+  width: 100%;
+}
+.sim-field select {
+  background: #f8fafc;
+  color: var(--fg);
+  border: 1px solid var(--line-bright);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: 600 14px var(--font-sans);
+}
+.sim-field input[type="range"] {
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
+.t-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid var(--line-bright);
+  color: var(--fg);
+  font: 700 12px var(--font-sans);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.t-btn:hover {
+  border-color: var(--blue);
+}
+.t-btn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+}
+
+.sim-output {
+  background: linear-gradient(160deg, #ffffff 0%, #f0f5ff 100%);
+  border: 1px solid var(--line-bright);
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  color: var(--fg);
+}
+.sim-readout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 18px 0;
+}
+.sim-metric {
+  background: #ffffff;
+  border: 1px solid var(--line-bright);
+  border-radius: 16px;
+  padding: 16px;
+}
+.sim-metric span {
+  font: 700 11px var(--font-mono);
+  color: var(--mut);
+  text-transform: uppercase;
+}
+.sim-metric strong {
+  display: block;
+  font: 800 30px var(--font-mono);
+  margin-top: 4px;
+  color: var(--fg);
+}
+.action-banner {
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1.5px solid currentColor;
+  background: rgba(21, 128, 61, 0.08);
+  color: var(--g);
+  transition: all 0.25s;
+}
+.action-banner span {
+  display: block;
+  font: 800 10px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.action-banner strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* =========================================================
+   TERMINAL & REPRODUCIBILITY (#run)
+   ========================================================= */
+.term-window {
+  background: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+.term-bar {
+  background: #1e293b;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.term-dots {
+  display: flex;
+  gap: 8px;
+}
+.term-dots i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.term-title {
+  font: 600 12px var(--font-mono);
+  color: #cbd5e1;
+}
+.term-actions {
+  display: flex;
+  gap: 10px;
+}
+.term-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font: 600 12px var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.term-btn:hover {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.term-btn.run-btn {
+  background: rgba(46, 229, 157, 0.18);
+  border-color: rgba(46, 229, 157, 0.50);
+  color: #4ade80;
+}
+pre {
+  margin: 0;
+  padding: 24px;
+  overflow-x: auto;
+  font: 13.5px/1.9 var(--font-mono);
+  color: #f1f5f9;
+}
+pre s {
+  text-decoration: none;
+  color: #94a3b8;
+}
+#term-log {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: #090d16;
+  padding: 0 24px;
+  max-height: 0;
+  overflow: hidden;
+  font: 12.5px/1.8 var(--font-mono);
+  color: #4ade80;
+  transition: max-height 0.45s ease, padding 0.45s ease;
+}
+#term-log.open {
+  padding: 18px 24px;
+  max-height: 340px;
+}
+
+footer {
+  border-top: 1px solid var(--line-bright);
+  padding: 48px 0 64px;
+  color: var(--mut);
+  font-size: 13.5px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 640px) {
+  .kv { grid-template-columns: 1fr; }
+  .sla-timeline { grid-template-columns: 1fr 1fr; }
+  .row { grid-template-columns: 1fr 70px; }
+  .row .t { grid-column: 1 / -1; order: 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  .ln > span, h2 { opacity: 1 !important; transform: none !important; filter: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Laser Scroll Progress Bar -->
+<div id="scroll-laser" aria-hidden="true"></div>
+
+<!-- Light Cinematic Volumetric Shades & Anamorphic Streak -->
+<div class="bg-cinema" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="anamorphic-streak" aria-hidden="true"></div>
+
+<!-- Globe Hover Tooltip -->
+<div id="globe-tip" role="status" aria-live="polite"></div>
+
+<!-- Tiny Interactive Robot Companion (Follows cursor, lands on it, and runs away!) -->
+<div id="mini-bot" title="Click or poke me! I follow, land on your cursor, or dart away!">
+  <div id="bot-bubble">Scanning hubs...</div>
+  <svg viewBox="0 0 54 54" width="54" height="54" aria-label="Tiny logistics robot companion">
+    <!-- Thruster Plume -->
+    <path class="bot-thruster" d="M22 44 L27 53 L32 44 Z" fill="url(#thrustGrad)"/>
+    <defs>
+      <linearGradient id="thrustGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#333b4d"/>
+        <stop offset="100%" stop-color="#1e2330"/>
+      </linearGradient>
+    </defs>
+    <!-- Antenna -->
+    <line x1="27" y1="12" x2="27" y2="5" stroke="#9ba3b4" stroke-width="2" stroke-linecap="round"/>
+    <circle id="bot-led" cx="27" cy="4.5" r="3" fill="#38bdf8"/>
+    <!-- Left & Right Hover Wings -->
+    <path d="M9 27 C5 27 5 34 9 34 Z" fill="#64748b"/>
+    <path d="M45 27 C49 27 49 34 45 34 Z" fill="#64748b"/>
+    <!-- Robot Head / Chassis -->
+    <rect x="11" y="13" width="32" height="27" rx="12" fill="url(#bodyGrad)" stroke="#64748b" stroke-width="1.8"/>
+    <!-- Visor Screen -->
+    <rect x="15" y="18" width="24" height="14" rx="7" fill="#0d1017"/>
+    <!-- Expressive Eyes Group (moves toward cursor) -->
+    <g id="bot-eyes">
+      <circle id="bot-eye-l" cx="22" cy="25" r="2.6" fill="#38bdf8"/>
+      <circle id="bot-eye-r" cx="32" cy="25" r="2.6" fill="#38bdf8"/>
+    </g>
+    <!-- Landing Feet -->
+    <rect x="17" y="40" width="6" height="3.5" rx="1.7" fill="#475569"/>
+    <rect x="31" y="40" width="6" height="3.5" rx="1.7" fill="#475569"/>
+  </svg>
+</div>
+
+<!-- Top Navigation with Stylish Bold Main Words & (Part A-D) -->
+<nav>
+  <a href="#top" class="nav-brand">
+    <i class="brand-dot"></i>
+    <span>Delhivery Delay Intelligence</span>
+  </a>
+  <div class="nav-links">
+    <a href="#problem"><b>Problem</b></a>
+    <a href="#data"><b>Data</b> <span>(Part A)</span></a>
+    <a href="#models"><b>Hours</b> <span>(Part B)</span></a>
+    <a href="#classifier"><b>Alerts</b> <span>(Part C)</span></a>
+    <a href="#hubs"><b>Hubs</b> <span>(Part D)</span></a>
+    <a href="#simulator"><b>Simulator</b></a>
+    <a href="#run"><b>Run</b></a>
+  </div>
+  <div class="nav-controls">
+    <button type="button" id="bot-mode-btn" class="pill-btn active" title="Click to switch the tiny robot's mood!">
+      <span>🤖 Bot: Auto</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO: Spacious Interactive 3D 24-Hub Sphere & Telemetry Inspector -->
+<header id="top">
+  <div class="w hero-header">
+    <div class="hero-badge">
+      <span>CAPSTONE PIPELINE</span> · E&amp;ICT ACADEMY, IIT ROORKEE · 24 HUBS LIVE
+    </div>
+    <h1>
+      <span class="ln"><span>Know which parcel</span></span>
+      <span class="ln"><span>will be late.</span></span>
+      <span class="ln"><span class="g">Before it is.</span></span>
+    </h1>
+    <p class="lead">
+      An end-to-end machine learning pipeline that predicts exact delivery hours, flags at-risk shipments before they breach SLA promises, and audits all 24 regional hubs.
+    </p>
+  </div>
+
+  <!-- Spacious Interactive 3D Sphere + Live Hub Inspector -->
+  <div class="sphere-command-wrap">
+    <div class="sphere-stage">
+      <div class="sphere-hud-top">
+        <div class="sphere-filters" role="group" aria-label="Filter 24 hubs by segment">
+          <button type="button" class="sf-btn active" data-filter="all">All 24 Hubs</button>
+          <button type="button" class="sf-btn" data-filter="Standard">Standard (7)</button>
+          <button type="button" class="sf-btn" data-filter="Watch">Watch (8)</button>
+          <button type="button" class="sf-btn" data-filter="Escalate">Escalate (9)</button>
+          <button type="button" class="sf-btn" data-filter="mismatch">⚠ Mislabeled (4)</button>
+        </div>
+        <button type="button" class="sphere-hint" id="auto-rot-btn">⟳ Drag to Rotate · Auto: ON</button>
+      </div>
+      <canvas id="g" aria-label="Interactive 3D network of 24 Delhivery hubs across India"></canvas>
+    </div>
+
+    <!-- Live Hub Telemetry Inspector Card -->
+    <aside class="hub-inspector" aria-live="polite">
+      <div>
+        <div class="hi-header">
+          <div>
+            <div class="hi-id" id="hi-id">HUB07 · EAST REGION</div>
+            <div class="hi-city" id="hi-city">Kolkata</div>
+          </div>
+          <span class="p" id="hi-seg-pill" style="color:var(--o)">Watch</span>
+        </div>
+        <div class="hi-grid">
+          <div class="hi-stat">
+            <span>Official Tier</span>
+            <strong id="hi-tier">Tier 1</strong>
+          </div>
+          <div class="hi-stat">
+            <span>Delay Rate</span>
+            <strong id="hi-delay" style="color:var(--o)">18.0%</strong>
+          </div>
+          <div class="hi-stat">
+            <span>Mean Hours</span>
+            <strong id="hi-hours">57.4h</strong>
+          </div>
+          <div class="hi-stat">
+            <span>Mean Distance</span>
+            <strong id="hi-dist">318 km</strong>
+          </div>
+          <div class="hi-stat">
+            <span>Route Stops</span>
+            <strong id="hi-stops">71 stops</strong>
+          </div>
+          <div class="hi-stat">
+            <span>Daily Capacity</span>
+            <strong id="hi-cap">1,200</strong>
+          </div>
+        </div>
+      </div>
+      <div class="hi-status" id="hi-status">
+        <strong>⚠ Tier vs. Segment Mismatch:</strong> Official label is Tier 1 (Standard), but real telemetry places Kolkata in the <b>Watch</b> playbook. Click any node on the 3D sphere to inspect.
+      </div>
+    </aside>
+  </div>
+
+  <!-- Dedicated Below-Sphere Zone (Generous Spacing, Zero Crowding) -->
+  <div class="w hero-footer">
+    <div class="key">
+      <span><i style="background:var(--g)"></i>Standard · 7 hubs (2.57% delay)</span>
+      <span><i style="background:var(--o)"></i>Watch · 8 hubs (15.50% delay)</span>
+      <span><i style="background:var(--r)"></i>Escalate · 9 hubs (46.00% delay)</span>
+    </div>
+    <div class="hero-actions">
+      <a class="cta" href="#problem">Explore the Pipeline</a>
+      <a class="cta cta-sec" href="#simulator">Launch Dispatch Simulator</a>
+    </div>
+  </div>
+</header>
+
+<!-- SCROLLYTELLING NARRATIVE -->
+<section id="story">
+  <div class="w">
+    <div class="tag"><strong>Telemetry</strong> <span class="part-paren">(SLA Promise)</span></div>
+    <p class="scrub">Every parcel makes a promise. Most keep it. Nearly one in four does not. This pipeline finds those parcels before the customer notices.</p>
+    <div class="sla-timeline">
+      <div class="sla-node active" data-step="0">
+        <strong>00h</strong>
+        <span>Parcel Dispatched at Hub</span>
+      </div>
+      <div class="sla-node" data-step="0.25">
+        <strong style="color:var(--r)">36h</strong>
+        <span>Express SLA Promise (48.97% late)</span>
+      </div>
+      <div class="sla-node" data-step="0.55">
+        <strong style="color:var(--o)">60h</strong>
+        <span>Standard SLA Promise (20.56% late)</span>
+      </div>
+      <div class="sla-node" data-step="0.8">
+        <strong style="color:var(--g)">96h</strong>
+        <span>Economy SLA Promise (8.57% late)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE PROBLEM -->
+<section id="problem">
+  <div class="w">
+    <div class="tag"><strong>Overview</strong> <span class="part-paren">(The 3 Core Questions)</span></div>
+    <h2>Three questions operations could not answer.</h2>
+    <p class="lead">Every parcel is booked with a strict delivery promise: Express 36 hours, Standard 60 hours, Economy 96 hours. This repository turns 1,224 raw shipment exports into one connected decision system.</p>
+    
+    <div class="stats">
+      <div><strong data-n="1200">0</strong><span>clean shipments after removing 24 exact duplicates</span></div>
+      <div><strong data-n="94.9" data-d="1" data-s="%">0</strong><span>final test R² predicting exact delivery hours</span></div>
+      <div><strong data-n="0.756" data-d="3">0</strong><span>delay recall at the 0.50 probability threshold</span></div>
+      <div><strong data-n="4">0</strong><span>hubs whose official tier label mismatches behavior</span></div>
+    </div>
+
+    <div class="cards">
+      <div class="card tilt">
+        <div class="n g">01</div>
+        <h3>How long will a parcel really take?</h3>
+        <p>Planners need an accurate point estimate of delivery hours at dispatch time — solved in <b>Hours</b> <span style="font-family:var(--font-mono);font-size:13px">(Part B)</span>.</p>
+      </div>
+      <div class="card tilt">
+        <div class="n g">02</div>
+        <h3>Which parcels will miss their promise?</h3>
+        <p>Operations can place a proactive customer call or escalate to a hub manager before a breach — solved in <b>Alerts</b> <span style="font-family:var(--font-mono);font-size:13px">(Part C)</span>.</p>
+      </div>
+      <div class="card tilt">
+        <div class="n g">03</div>
+        <h3>Which hubs need which playbook?</h3>
+        <p>Auditing whether each hub's Tier 1, 2, or 3 paper label matches real delivery behavior — solved in <b>Hubs</b> <span style="font-family:var(--font-mono);font-size:13px">(Part D)</span>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA (Part A) -->
+<section id="data">
+  <div class="w">
+    <div class="tag"><strong>Data</strong> <span class="part-paren">(Part A · 25 Marks)</span></div>
+    <h2>From messy exports to a modelling table you can trust.</h2>
+    <p class="lead">Reusable functions <code style="color:var(--blue);font-weight:600">clean_shipments</code> and <code style="color:var(--blue);font-weight:600">build_features</code> in <code style="color:var(--blue);font-weight:600">src/shipment_prep.py</code> sanitize text glitches, scanner faults, and missing cells before any model sees the data.</p>
+
+    <div class="panel rise">
+      <ol class="steps">
+        <li><b>Remove exact duplicates</b>24 duplicate rows dropped from 1,224 raw records, leaving 1,200 unique shipments across 24 hubs.</li>
+        <li><b>Normalize service type</b>Leading/trailing whitespace stripped and title-cased, collapsing 12 messy spellings into 3 (Express, Standard, Economy).</li>
+        <li><b>Fill payment mode</b>18 missing payment cells replaced with the clean placeholder <code>"Unknown"</code>.</li>
+        <li><b>Parse declared value</b>Rupee signs (₹) and commas stripped into <code>declared_value_inr</code>, then natural-log transformed (<code>log_declared_value</code>).</li>
+        <li><b>Catch 999 kg scanner faults</b>5 sentinel weights above 100 kg (network limit 40 kg) converted to missing prior to median imputation.</li>
+        <li><b>Impute with training medians</b>36 missing distances (314.95 km), 29 missing weights (1.83 kg), and 12 missing values (INR 1,121.50) imputed cleanly.</li>
+      </ol>
+
+      <div class="stats" style="margin-top:44px">
+        <div><strong data-n="278">0</strong><span>total delayed parcels (delivery_hours &gt; promised_hours)</span></div>
+        <div><strong data-n="23.17" data-d="2" data-s="%">0</strong><span>overall network delay rate across 1,200 shipments</span></div>
+        <div><strong data-n="314.95" data-d="2" data-s=" km">0</strong><span>median lane distance across all hubs</span></div>
+        <div><strong data-n="1121.5" data-d="1" data-s="">0</strong><span>median declared value in INR (mean INR 1,533.05)</span></div>
+      </div>
+
+      <div class="sub-grid">
+        <div class="mini-box">
+          <h4>Delay Rate by Service Type</h4>
+          <div class="row"><span>Express (36h SLA)</span><div class="t"><span class="bar" style="--w:48.97%;background:var(--r)"></span></div><em style="color:var(--r)">48.97%</em></div>
+          <div class="row"><span>Standard (60h SLA)</span><div class="t"><span class="bar" style="--w:20.56%;background:var(--o)"></span></div><em style="color:var(--o)">20.56%</em></div>
+          <div class="row"><span>Economy (96h SLA)</span><div class="t"><span class="bar" style="--w:8.57%;background:var(--g)"></span></div><em style="color:var(--g)">8.57%</em></div>
+        </div>
+        <div class="mini-box">
+          <h4>Delay Rate by Distance Band (km)</h4>
+          <div class="row"><span>0–200 km (274)</span><div class="t"><span class="bar" style="--w:2.19%;background:var(--g)"></span></div><em style="color:var(--g)">2.19%</em></div>
+          <div class="row"><span>201–400 km (563)</span><div class="t"><span class="bar" style="--w:13.68%;background:var(--blue)"></span></div><em>13.68%</em></div>
+          <div class="row"><span>401–600 km (275)</span><div class="t"><span class="bar" style="--w:43.64%;background:var(--o)"></span></div><em style="color:var(--o)">43.64%</em></div>
+          <div class="row"><span>601+ km (88)</span><div class="t"><span class="bar" style="--w:85.23%;background:var(--r)"></span></div><em style="color:var(--r)">85.23%</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOURS (Part B) -->
+<section id="models">
+  <div class="w">
+    <div class="tag"><strong>Hours</strong> <span class="part-paren">(Part B · 20 Marks)</span></div>
+    <h2>Gradient Boosting explains 94.9% of delivery-time variance.</h2>
+    <p class="lead">Split 70 / 15 / 15 (840 training, 180 validation, 180 test rows). <code style="color:var(--blue);font-weight:600">StandardScaler</code> is fitted strictly on the 840 training rows so zero test information leaks.</p>
+    
+    <div class="panel rise">
+      <div class="row"><span>Mean baseline (val)</span><div class="t"><span class="bar" style="--w:2%;background:var(--r)"></span></div><em style="color:var(--r)">−0.021</em></div>
+      <div class="row"><span>Decision tree (depth 6, val)</span><div class="t"><span class="bar" style="--w:88.7%"></span></div><em>0.887</em></div>
+      <div class="row"><span>Random forest (100 trees, val)</span><div class="t"><span class="bar" style="--w:91.4%"></span></div><em>0.914</em></div>
+      <div class="row"><span>Linear regression (scaled, val)</span><div class="t"><span class="bar" style="--w:93.1%"></span></div><em>0.931</em></div>
+      <div class="row"><span>Gradient boosting (lr=0.1, val)</span><div class="t"><span class="bar" style="--w:93.1%"></span></div><em>0.931</em></div>
+      <div class="row"><span><b style="color:var(--g)">Gradient boosting (Final Test)</b></span><div class="t"><span class="bar" style="--w:94.9%;background:var(--g)"></span></div><em style="color:var(--g)">0.949</em></div>
+      <p style="color:var(--mut);font-size:14px;margin-top:22px">
+        5-fold cross-validation across the 1,020 training+validation rows yielded mean R² of <strong>0.926</strong> (Linear Regression) and <strong>0.935</strong> (Gradient Boosting). On the locked 180 test rows, Gradient Boosting achieved <strong style="color:var(--g)">MAE 3.12 hours</strong> and <strong style="color:var(--g)">RMSE 4.15 hours</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ALERTS (Part C) -->
+<section id="classifier">
+  <div class="w">
+    <div class="tag"><strong>Alerts</strong> <span class="part-paren">(Part C · 30 Marks)</span></div>
+    <h2>Catch three of every four delays before they happen.</h2>
+    <p class="lead">Because 76.67% of shipments arrive on time, a blind baseline looks accurate while catching zero late parcels. We strip warehouse noise and tune probability thresholds for operations.</p>
+
+    <div class="panel rise">
+      <div class="split">
+        <div class="gauge-wrap">
+          <svg class="gauge" viewBox="0 0 140 140" role="img" aria-label="Recall 0.756 and precision 0.689 at 0.50 threshold">
+            <circle class="bg-ring" cx="70" cy="70" r="60"/>
+            <circle class="bg-ring" cx="70" cy="70" r="46"/>
+            <circle class="a" cx="70" cy="70" r="60"/>
+            <circle class="b" cx="70" cy="70" r="46"/>
+            <text x="70" y="74" font-size="23">0.50</text>
+            <text x="70" y="89" font-size="6.2" style="fill:var(--mut);font-weight:700;letter-spacing:0.08em">ALERT THRESHOLD</text>
+          </svg>
+        </div>
+        <div>
+          <h3 style="font-size:26px;letter-spacing:-0.02em;line-height:1.18">Signal vs. Warehouse Bookkeeping Noise</h3>
+          <p style="color:var(--mut);margin-top:10px;font-size:15px">
+            Five random warehouse columns absorbed <strong>22.5%</strong> of an untuned forest's feature importance despite having F-scores below 10. <code style="color:var(--blue);font-weight:600">SelectKBest(f_classif, k=7)</code> isolated the 7 genuine operational drivers:
+          </p>
+          <div class="pill-list">
+            <span class="f-pill">distance_km</span>
+            <span class="f-pill">hub_tier</span>
+            <span class="f-pill">hub_daily_capacity</span>
+            <span class="f-pill">n_stops</span>
+            <span class="f-pill">promised_hours</span>
+            <span class="f-pill">rain_flag</span>
+            <span class="f-pill">sale_event_flag</span>
+            <span class="f-pill noise">label_print_batch</span>
+            <span class="f-pill noise">scanner_build_no</span>
+            <span class="f-pill noise">tape_roll_no</span>
+            <span class="f-pill noise">sticker_serial_mod</span>
+            <span class="f-pill noise">shelf_slot_no</span>
+          </div>
+          <div class="kv">
+            <div><strong style="color:var(--o)">0.756</strong><span>Test Recall (31/41 caught)</span></div>
+            <div><strong style="color:var(--blue)">0.689</strong><span>Test Precision</span></div>
+            <div><strong style="color:var(--g)">0.721</strong><span>Final Test F1 Score</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HUBS (Part D) -->
+<section id="hubs">
+  <div class="w">
+    <div class="tag"><strong>Hubs</strong> <span class="part-paren">(Part D · 25 Marks)</span></div>
+    <h2>Four hubs wear the wrong tier label.</h2>
+    <p class="lead">K-Means clustering (<code style="color:var(--blue);font-weight:600">K=3</code>, across-over-within separation ratio <code style="color:var(--blue);font-weight:600">5.393</code>) segments all 24 hubs by real delivery hours, delay rate, distance, and route stops.</p>
+
+    <div class="seg">
+      <div class="card tilt">
+        <strong style="color:var(--g)">7 Hubs</strong>
+        <h3 style="margin-top:12px">Standard Playbook</h3>
+        <p><strong>2.57% delay rate</strong> · 47.24h mean hours · 188.93 km mean distance · 55.37 stops. Fast metro turnaround.</p>
+      </div>
+      <div class="card tilt">
+        <strong style="color:var(--o)">8 Hubs</strong>
+        <h3 style="margin-top:12px">Watch Playbook</h3>
+        <p><strong>15.50% delay rate</strong> · 56.81h mean hours · 314.18 km mean distance · 70.72 stops. Proactive call when flagged.</p>
+      </div>
+      <div class="card tilt">
+        <strong style="color:var(--r)">9 Hubs</strong>
+        <h3 style="margin-top:12px">Escalate Playbook</h3>
+        <p><strong>46.00% delay rate</strong> · 64.65h mean hours · 470.48 km mean distance · 84.34 stops. Manager escalation when flagged.</p>
+      </div>
+    </div>
+
+    <div class="panel rise scroll">
+      <h3 style="font-size:20px;margin-bottom:18px">Tier vs. Segment Mismatch Audit (<code style="color:var(--blue);font-size:15px">outputs/tier_vs_segment_mismatch.csv</code>)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Hub ID</th>
+            <th>City &amp; Region</th>
+            <th>Official Paper Tier</th>
+            <th>Actual K-Means Segment</th>
+            <th>Operational Playbook Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>HUB07</b></td>
+            <td>Kolkata · East</td>
+            <td><span class="p" style="color:var(--g)">Tier 1 · Standard</span></td>
+            <td><span class="p" style="color:var(--o)">Watch</span></td>
+            <td>Reassign from Standard to Watch monitoring protocol</td>
+          </tr>
+          <tr>
+            <td><b>HUB13</b></td>
+            <td>Nagpur · West</td>
+            <td><span class="p" style="color:var(--o)">Tier 2 · Watch</span></td>
+            <td><span class="p" style="color:var(--r)">Escalate</span></td>
+            <td>Escalate oversight &amp; audit line-haul capacity</td>
+          </tr>
+          <tr>
+            <td><b>HUB15</b></td>
+            <td>Kochi · South</td>
+            <td><span class="p" style="color:var(--o)">Tier 2 · Watch</span></td>
+            <td><span class="p" style="color:var(--r)">Escalate</span></td>
+            <td>Escalate oversight &amp; review coastal route stops</td>
+          </tr>
+          <tr>
+            <td><b>HUB22</b></td>
+            <td>Dehradun · North</td>
+            <td><span class="p" style="color:var(--r)">Tier 3 · Escalate</span></td>
+            <td><span class="p" style="color:var(--o)">Watch</span></td>
+            <td>Promote hub to Watch tier playbook standards</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cards">
+      <div class="card tilt">
+        <h3 style="color:var(--r)">Escalate to hub manager</h3>
+        <p>Triggered when a parcel is flagged as likely late (<code>delay_probability ≥ 0.50</code>) and sits in an <b>Escalate</b> hub.</p>
+      </div>
+      <div class="card tilt">
+        <h3 style="color:var(--o)">Proactive customer call</h3>
+        <p>Triggered when a parcel is flagged as likely late (<code>delay_probability ≥ 0.50</code>) and sits in a <b>Standard</b> or <b>Watch</b> hub.</p>
+      </div>
+      <div class="card tilt">
+        <h3 style="color:var(--g)">No action</h3>
+        <p>Low delay probability (<code>&lt; 0.50</code>). The parcel is expected on time. All 48 new parcels in <code>new_shipments.csv</code> are scored this way.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERACTIVE LIVE DISPATCH TELEMETRY SIMULATOR -->
+<section id="simulator">
+  <div class="w">
+    <div class="tag"><strong>Simulator</strong> <span class="part-paren">(Live Scoring Engine)</span></div>
+    <h2>Test the live parcel scoring engine.</h2>
+    <p class="lead">Simulate how <code style="color:var(--blue);font-weight:600">predict_delay.py</code> combines <b>Hours</b> <code>(Part B)</code>, <b>Alerts</b> <code>(Part C)</code>, and <b>Hubs</b> <code>(Part D)</code> to assign an instant operational action.</p>
+
+    <div class="panel rise">
+      <div class="sim-grid">
+        <div class="sim-controls">
+          <div class="sim-field" style="grid-column: 1 / -1">
+            <label for="sim-hub"><span>Origin / Destination Hub (24 Hubs)</span><b id="sim-hub-badge">Escalate Segment</b></label>
+            <select id="sim-hub"></select>
+          </div>
+
+          <div class="sim-field">
+            <label><span>Service Type &amp; SLA</span><b id="sim-sla-lbl">60h Promise</b></label>
+            <div class="toggle-row" id="sim-service">
+              <button type="button" class="t-btn" data-val="Express">Express</button>
+              <button type="button" class="t-btn active" data-val="Standard">Standard</button>
+              <button type="button" class="t-btn" data-val="Economy">Economy</button>
+            </div>
+          </div>
+
+          <div class="sim-field">
+            <label><span>Payment Mode</span><b id="sim-pay-lbl">Prepaid</b></label>
+            <div class="toggle-row" id="sim-pay">
+              <button type="button" class="t-btn active" data-val="Prepaid">Prepaid</button>
+              <button type="button" class="t-btn" data-val="COD">COD (+3h)</button>
+            </div>
+          </div>
+
+          <div class="sim-field">
+            <label for="sim-dist"><span>Lane Distance</span><b id="sim-dist-val">315 km</b></label>
+            <input type="range" id="sim-dist" min="15" max="1100" value="315" step="5">
+          </div>
+
+          <div class="sim-field">
+            <label for="sim-stops"><span>Rider Route Stops</span><b id="sim-stops-val">70 stops</b></label>
+            <input type="range" id="sim-stops" min="20" max="140" value="70" step="1">
+          </div>
+
+          <div class="sim-field" style="grid-column: 1 / -1">
+            <label><span>Weather &amp; Peak Conditions</span><b id="sim-cond-lbl">Normal Conditions</b></label>
+            <div class="toggle-row">
+              <button type="button" class="t-btn" id="sim-rain">Monsoon Rain Flag (+4h)</button>
+              <button type="button" class="t-btn" id="sim-sale">Sept Sale Window (+7h)</button>
+              <button type="button" class="t-btn" id="sim-weekend">Weekend Dispatch (+2h)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sim-output">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font:700 11px var(--font-mono);color:var(--blue);letter-spacing:0.08em">LIVE TELEMETRY PREDICTION</span>
+              <span id="sim-flag-pill" class="p" style="color:var(--g)">FLAGGED = 0</span>
+            </div>
+            <div class="sim-readout">
+              <div class="sim-metric">
+                <span>Est. Delivery Hours</span>
+                <strong id="sim-hours-out">46.9h</strong>
+              </div>
+              <div class="sim-metric">
+                <span>Delay Probability</span>
+                <strong id="sim-prob-out" style="color:var(--g)">12.4%</strong>
+              </div>
+            </div>
+            <p id="sim-explain" style="font-size:13.5px;color:var(--mut);margin-bottom:20px">
+              Promised window is 60 hours. Predicted arrival leaves a comfortable +13.1h buffer below the 0.50 alert threshold.
+            </p>
+          </div>
+          <div class="action-banner" id="sim-action-box">
+            <span>ASSIGNED OPERATIONS PLAYBOOK ACTION</span>
+            <strong id="sim-action-text">No action</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RUN IT YOURSELF / TERMINAL -->
+<section id="run">
+  <div class="w">
+    <div class="tag"><strong>Pipeline</strong> <span class="part-paren">(100% Offline &amp; Reproducible)</span></div>
+    <h2>Seven commands. Everything regenerates.</h2>
+    <p class="lead">Every script runs top-to-bottom from a clean clone on the <code style="color:var(--blue);font-weight:600">main</code> branch using pinned open-source libraries.</p>
+
+    <div class="panel rise" style="padding:0;border:0;background:transparent;box-shadow:none">
+      <div class="term-window">
+        <div class="term-bar">
+          <div class="term-dots">
+            <i style="background:#ff5f56"></i>
+            <i style="background:#ffbd2e"></i>
+            <i style="background:#27c93f"></i>
+          </div>
+          <div class="term-title">bash — delhivery-delay-pipeline (main)</div>
+          <div class="term-actions">
+            <button type="button" class="term-btn run-btn" id="sim-run-btn">▶ Simulate Pipeline Run</button>
+            <button type="button" class="term-btn" id="cp">Copy Commands</button>
+          </div>
+        </div>
+        <pre id="code">pip install -r requirements.txt
+python generate_data.py          <s># writes data/hubs.csv (24), raw_shipments.csv (1224), new_shipments.csv (48)</s>
+python part_a_clean_eda.py       <s># Data (Part A): cleans data, writes modelling_table.csv (1200)</s>
+python part_b_regression.py      <s># Hours (Part B): trains delivery-hours models (Test R² = 0.949)</s>
+python part_c_classification.py  <s># Alerts (Part C): selects top 7 features, sets 0.50 threshold</s>
+python part_d_segments.py        <s># Hubs (Part D): K-Means (K=3) clustering &amp; 4 tier mismatches</s>
+python package_model.py          <s># packages models/delay_model.pkl &amp; verifies 0.0 reload diff</s>
+python predict_delay.py          <s># scores 48 new parcels into outputs/new_shipment_actions.csv</s></pre>
+        <div id="term-log" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="w" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div><b>Delhivery Last-Mile Delay Intelligence Pipeline</b> · Capstone Project, E&amp;ICT Academy, IIT Roorkee.</div>
+    <div style="font-family:var(--font-mono);color:var(--blue);font-weight:600">DATA (Part A) · HOURS (Part B) · ALERTS (Part C) · HUBS (Part D)</div>
+  </div>
+</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* =========================================================
+   ANIMATED COUNTERS & INTERSECTION OBSERVER
+   ========================================================= */
+function count(el) {
+  const n = +el.dataset.n;
+  const d = +(el.dataset.d || 0);
+  const s = el.dataset.s || '';
+  const t0 = performance.now();
+  (function frame(now) {
+    const p = Math.min((now - t0) / 1500, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (n * e).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + s;
+    if (p < 1) requestAnimationFrame(frame);
+  })(t0);
+}
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    if (e.target.dataset.n) count(e.target);
+    io.unobserve(e.target);
+  });
+}, { threshold: 0.35 });
+
+$$('[data-n], .bar, .gauge, h2').forEach(el => io.observe(el));
+
+/* =========================================================
+   SCROLL PROGRESS, 3D PANEL RISE & STORY SCRUBBING
+   ========================================================= */
+const riseEls = $$('.rise');
+const sc = $('.scrub');
+const st = $('#story');
+const laser = $('#scroll-laser');
+const slaNodes = $$('.sla-node');
+
+sc.innerHTML = sc.textContent.split(' ').map(w => `<span>${w}</span>`).join(' ');
+const wd = $$('.scrub span');
+
+function tick() {
+  const vh = innerHeight;
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - vh);
+  const scrollPct = Math.min(1, Math.max(0, scrollY / maxScroll));
+  laser.style.width = (scrollPct * 100).toFixed(2) + '%';
+
+  // Scrollytelling word illumination
+  const sr = st.getBoundingClientRect();
+  const sp = Math.max(0, Math.min(1, -sr.top / (sr.height - vh)));
+  wd.forEach((w, i) => w.classList.toggle('on', i < sp * 1.18 * wd.length));
+  slaNodes.forEach(node => {
+    node.classList.toggle('active', sp >= parseFloat(node.dataset.step));
+  });
+
+  // Smooth 3D panel rise
+  riseEls.forEach(el => {
+    const r = el.getBoundingClientRect();
+    const p = Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.68)));
+    el.style.transform = `perspective(1400px) rotateX(${(1 - p) * 16}deg) translateY(${(1 - p) * 34}px) scale(${0.95 + 0.05 * p})`;
+    el.style.opacity = 0.25 + 0.75 * p;
+  });
+}
+
+if (!calm) {
+  addEventListener('scroll', tick, { passive: true });
+  addEventListener('resize', tick);
+  tick();
+} else {
+  wd.forEach(w => w.classList.add('on'));
+}
+
+/* =========================================================
+   ALL 24 REAL DELHIVERY HUBS DATA & CRYSTAL-CLEAR 3D SPHERE
+   ========================================================= */
+const HUBS_DATA = [
+  { id: "HUB01", city: "Mumbai", region: "West", tier: 1, opTier: 1, seg: "Standard", cap: 1500, hours: 45.7, delay: 2.0, dist: 185, stops: 55, mismatch: false },
+  { id: "HUB02", city: "Delhi", region: "North", tier: 1, opTier: 1, seg: "Standard", cap: 1600, hours: 46.8, delay: 2.0, dist: 188, stops: 55, mismatch: false },
+  { id: "HUB03", city: "Bengaluru", region: "South", tier: 1, opTier: 1, seg: "Standard", cap: 1450, hours: 47.4, delay: 4.0, dist: 191, stops: 56, mismatch: false },
+  { id: "HUB04", city: "Hyderabad", region: "South", tier: 1, opTier: 1, seg: "Standard", cap: 1350, hours: 47.1, delay: 2.0, dist: 186, stops: 55, mismatch: false },
+  { id: "HUB05", city: "Chennai", region: "South", tier: 1, opTier: 1, seg: "Standard", cap: 1300, hours: 47.9, delay: 4.0, dist: 192, stops: 56, mismatch: false },
+  { id: "HUB06", city: "Pune", region: "West", tier: 1, opTier: 1, seg: "Standard", cap: 1250, hours: 47.6, delay: 2.0, dist: 190, stops: 55, mismatch: false },
+  { id: "HUB07", city: "Kolkata", region: "East", tier: 1, opTier: 2, seg: "Watch", cap: 1200, hours: 57.4, delay: 18.0, dist: 318, stops: 71, mismatch: true },
+  { id: "HUB08", city: "Ahmedabad", region: "West", tier: 1, opTier: 1, seg: "Standard", cap: 1150, hours: 48.2, delay: 2.0, dist: 190, stops: 55, mismatch: false },
+  { id: "HUB09", city: "Jaipur", region: "North", tier: 2, opTier: 2, seg: "Watch", cap: 950, hours: 56.2, delay: 14.0, dist: 310, stops: 70, mismatch: false },
+  { id: "HUB10", city: "Lucknow", region: "North", tier: 2, opTier: 2, seg: "Watch", cap: 900, hours: 56.9, delay: 16.0, dist: 315, stops: 71, mismatch: false },
+  { id: "HUB11", city: "Chandigarh", region: "North", tier: 2, opTier: 2, seg: "Watch", cap: 850, hours: 55.8, delay: 14.0, dist: 308, stops: 70, mismatch: false },
+  { id: "HUB12", city: "Indore", region: "West", tier: 2, opTier: 2, seg: "Watch", cap: 820, hours: 57.1, delay: 16.0, dist: 316, stops: 71, mismatch: false },
+  { id: "HUB13", city: "Nagpur", region: "West", tier: 2, opTier: 3, seg: "Escalate", cap: 780, hours: 66.1, delay: 46.0, dist: 473, stops: 84, mismatch: true },
+  { id: "HUB14", city: "Coimbatore", region: "South", tier: 2, opTier: 2, seg: "Watch", cap: 740, hours: 56.5, delay: 14.0, dist: 312, stops: 70, mismatch: false },
+  { id: "HUB15", city: "Kochi", region: "South", tier: 2, opTier: 3, seg: "Escalate", cap: 700, hours: 65.4, delay: 44.0, dist: 468, stops: 84, mismatch: true },
+  { id: "HUB16", city: "Surat", region: "West", tier: 2, opTier: 2, seg: "Watch", cap: 650, hours: 57.2, delay: 16.0, dist: 319, stops: 71, mismatch: false },
+  { id: "HUB17", city: "Patna", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 520, hours: 60.9, delay: 46.0, dist: 443, stops: 84, mismatch: false },
+  { id: "HUB18", city: "Ranchi", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 480, hours: 64.8, delay: 46.0, dist: 472, stops: 85, mismatch: false },
+  { id: "HUB19", city: "Guwahati", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 450, hours: 65.2, delay: 48.0, dist: 478, stops: 85, mismatch: false },
+  { id: "HUB20", city: "Raipur", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 420, hours: 64.5, delay: 46.0, dist: 469, stops: 84, mismatch: false },
+  { id: "HUB21", city: "Bhubaneswar", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 390, hours: 64.9, delay: 46.0, dist: 474, stops: 84, mismatch: false },
+  { id: "HUB22", city: "Dehradun", region: "North", tier: 3, opTier: 2, seg: "Watch", cap: 350, hours: 57.4, delay: 16.0, dist: 315, stops: 71, mismatch: true },
+  { id: "HUB23", city: "Siliguri", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 310, hours: 65.1, delay: 46.0, dist: 476, stops: 85, mismatch: false },
+  { id: "HUB24", city: "Agartala", region: "East", tier: 3, opTier: 3, seg: "Escalate", cap: 270, hours: 65.0, delay: 46.0, dist: 481, stops: 84, mismatch: false }
+];
+
+const SEG_COLOR = {
+  Standard: '#15803d',
+  Watch: '#b45309',
+  Escalate: '#be123c'
+};
+
+const c = $('#g');
+const g = c.getContext('2d');
+const tip = $('#globe-tip');
+const N = HUBS_DATA.length;
+const D = window.devicePixelRatio || 1;
+
+let W, H;
+function rs() {
+  W = c.clientWidth;
+  H = c.clientHeight;
+  c.width = W * D;
+  c.height = H * D;
+  g.setTransform(D, 0, 0, D, 0, 0);
+}
+rs();
+addEventListener('resize', rs);
+
+// Fibonacci sphere coordinates for the 24 hubs
+const P = HUBS_DATA.map((hub, i) => {
+  const y = 1 - 2 * (i + 0.5) / N;
+  const r = Math.sqrt(1 - y * y);
+  const a = i * 2.3999632;
+  return { x: Math.cos(a) * r, y, z: Math.sin(a) * r, hub };
+});
+
+// Connected network lanes
+const EDGES = [];
+for (let i = 0; i < N; i++) {
+  for (let j = i + 1; j < N; j++) {
+    const d = Math.hypot(P[i].x - P[j].x, P[i].y - P[j].y, P[i].z - P[j].z);
+    if (d < 0.92) {
+      EDGES.push({ i, j, progress: Math.random(), speed: 0.0028 + Math.random() * 0.003 });
+    }
+  }
+}
+
+// Interactive Sphere State: Drag rotation, inertia, filter, and selected hub
+let rotY = 0.4;
+let rotX = 0.22;
+let velY = 0;
+let velX = 0;
+let isDraggingGlobe = false;
+let dragStartX = 0, dragStartY = 0, dragMoved = 0;
+let autoRotate = true;
+let activeFilter = 'all';
+let selectedHubId = 'HUB07';
+let hoveredHub = null;
+let ptrCanvasX = -9999, ptrCanvasY = -9999, ptrClientX = 0, ptrClientY = 0;
+let parallaxX = 0, parallaxY = 0, targetParallaxX = 0, targetParallaxY = 0;
+
+function selectHubForInspector(hub) {
+  selectedHubId = hub.id;
+  $('#hi-id').textContent = `${hub.id} · ${hub.region.toUpperCase()} REGION`;
+  $('#hi-city').textContent = hub.city;
+  const pill = $('#hi-seg-pill');
+  pill.textContent = hub.seg;
+  pill.style.color = SEG_COLOR[hub.seg];
+  $('#hi-tier').textContent = `Tier ${hub.tier}`;
+  const delEl = $('#hi-delay');
+  delEl.textContent = `${hub.delay.toFixed(1)}%`;
+  delEl.style.color = SEG_COLOR[hub.seg];
+  $('#hi-hours').textContent = `${hub.hours.toFixed(1)}h`;
+  $('#hi-dist').textContent = `${hub.dist} km`;
+  $('#hi-stops').textContent = `${hub.stops} stops`;
+  $('#hi-cap').textContent = hub.cap.toLocaleString();
+
+  const statusBox = $('#hi-status');
+  if (hub.mismatch) {
+    statusBox.style.background = 'rgba(190, 18, 60, 0.08)';
+    statusBox.style.borderColor = 'rgba(190, 18, 60, 0.32)';
+    statusBox.innerHTML = `<strong style="color:var(--r)">⚠ Tier vs. Segment Mismatch:</strong> Official paper label is <b>Tier ${hub.tier}</b>, but real telemetry places <b>${hub.city}</b> in the <b>${hub.seg}</b> playbook.`;
+  } else {
+    statusBox.style.background = 'rgba(21, 128, 61, 0.08)';
+    statusBox.style.borderColor = 'rgba(21, 128, 61, 0.32)';
+    statusBox.innerHTML = `<strong style="color:var(--g)">✓ Tier Aligned:</strong> Official <b>Tier ${hub.tier}</b> label matches <b>${hub.city}</b>'s real-world <b>${hub.seg}</b> operating behavior.`;
+  }
+}
+selectHubForInspector(HUBS_DATA[6]); // Default to HUB07 Kolkata
+
+// Filter Buttons
+$$('.sf-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('.sf-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+  });
+});
+
+// Auto-Rotate Toggle
+$('#auto-rot-btn').addEventListener('click', e => {
+  autoRotate = !autoRotate;
+  e.currentTarget.textContent = `⟳ Drag to Rotate · Auto: ${autoRotate ? 'ON' : 'OFF'}`;
+});
+
+// Pointer Drag & Hover Events on Canvas
+c.addEventListener('pointerdown', e => {
+  isDraggingGlobe = true;
+  dragMoved = 0;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  c.setPointerCapture(e.pointerId);
+});
+
+c.addEventListener('pointermove', e => {
+  const rect = c.getBoundingClientRect();
+  ptrCanvasX = e.clientX - rect.left;
+  ptrCanvasY = e.clientY - rect.top;
+  ptrClientX = e.clientX;
+  ptrClientY = e.clientY;
+
+  if (isDraggingGlobe) {
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    dragMoved += Math.hypot(dx, dy);
+    velY = dx * 0.0065;
+    velX = dy * 0.0065;
+    rotY += velY;
+    rotX = Math.max(-1.1, Math.min(1.1, rotX + velX));
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  } else {
+    // Gentle, calibrated mouse parallax when hovering inside the sphere stage
+    targetParallaxX = ((ptrCanvasX / W) - 0.5) * 0.16;
+    targetParallaxY = ((ptrCanvasY / H) - 0.5) * 0.12;
+  }
+});
+
+c.addEventListener('pointerup', e => {
+  isDraggingGlobe = false;
+  c.releasePointerCapture(e.pointerId);
+  if (dragMoved < 6 && hoveredHub) {
+    selectHubForInspector(hoveredHub.hub);
+    // Also sync simulator dropdown
+    const simSel = $('#sim-hub');
+    if (simSel) {
+      simSel.value = hoveredHub.hub.id;
+      simState.hubId = hoveredHub.hub.id;
+      updateSimulator();
+    }
+  }
+});
+
+c.addEventListener('pointerleave', () => {
+  isDraggingGlobe = false;
+  ptrCanvasX = -9999;
+  ptrCanvasY = -9999;
+  targetParallaxX = 0;
+  targetParallaxY = 0;
+  tip.style.opacity = '0';
+});
+
+function hubMatchesFilter(hub) {
+  if (activeFilter === 'all') return true;
+  if (activeFilter === 'mismatch') return hub.mismatch;
+  return hub.seg === activeFilter;
+}
+
+let pulseTime = 0;
+function drawGlobe() {
+  pulseTime += 0.04;
+
+  // Smooth inertia & auto-rotation with 0.045 lerp damping
+  if (!isDraggingGlobe) {
+    if (autoRotate && !calm) rotY += 0.0024;
+    rotY += velY;
+    rotX = Math.max(-1.1, Math.min(1.1, rotX + velX));
+    velY *= 0.92;
+    velX *= 0.92;
+  }
+  parallaxX += (targetParallaxX - parallaxX) * 0.045;
+  parallaxY += (targetParallaxY - parallaxY) * 0.045;
+
+  const effRotY = rotY + parallaxX;
+  const effRotX = rotX + parallaxY;
+  const cr = Math.cos(effRotY), sr = Math.sin(effRotY);
+  const cx = Math.cos(effRotX), sx = Math.sin(effRotX);
+
+  g.clearRect(0, 0, W, H);
+
+  const R = Math.min(W, H) * 0.38;
+  const centerX = W / 2;
+  const centerY = H / 2 + 8;
+
+  // 1. Crisp 3D Sphere Volume & Rim Shading on Light Cinematic Background
+  const sphereGrad = g.createRadialGradient(centerX - R * 0.3, centerY - R * 0.3, R * 0.08, centerX, centerY, R);
+  sphereGrad.addColorStop(0, 'rgba(255, 255, 255, 0.96)');
+  sphereGrad.addColorStop(0.65, 'rgba(226, 236, 252, 0.72)');
+  sphereGrad.addColorStop(1, 'rgba(186, 208, 242, 0.48)');
+  g.fillStyle = sphereGrad;
+  g.beginPath();
+  g.arc(centerX, centerY, R, 0, Math.PI * 2);
+  g.fill();
+
+  g.strokeStyle = 'rgba(15, 23, 42, 0.18)';
+  g.lineWidth = 1.25;
+  g.stroke();
+
+  // 2. Crisp Dark-Slate 3D Latitude Wireframe Rings for Depth on Light Theme
+  g.strokeStyle = 'rgba(15, 23, 42, 0.11)';
+  g.lineWidth = 1;
+  [-0.55, 0, 0.55].forEach(latY => {
+    const latR = Math.sqrt(1 - latY * latY);
+    g.beginPath();
+    for (let s = 0; s <= 48; s++) {
+      const ang = (s / 48) * Math.PI * 2;
+      const px = Math.cos(ang) * latR;
+      const pz = Math.sin(ang) * latR;
+      const x1 = px * cr + pz * sr;
+      const z1 = -px * sr + pz * cr;
+      const y2 = latY * cx - z1 * sx;
+      const z2 = latY * sx + z1 * cx;
+      const scale = 1 / (2.05 - z2 * 0.45);
+      const sx2 = centerX + x1 * R * scale * 1.6;
+      const sy2 = centerY + y2 * R * scale * 1.6;
+      if (s === 0) g.moveTo(sx2, sy2);
+      else g.lineTo(sx2, sy2);
+    }
+    g.stroke();
+  });
+
+  // 3. Project 24 Hubs into 2D Screen Space
+  const Q = P.map((p, idx) => {
+    const x1 = p.x * cr + p.z * sr;
+    const z1 = -p.x * sr + p.z * cr;
+    const y2 = p.y * cx - z1 * sx;
+    const z2 = p.y * sx + z1 * cx;
+    const s = 1 / (1.92 - z2 * 0.52);
+    const active = hubMatchesFilter(p.hub);
+    return {
+      idx,
+      x: centerX + x1 * R * s * 1.48,
+      y: centerY + y2 * R * s * 1.48,
+      z: z2,
+      s,
+      hub: p.hub,
+      active,
+      c: SEG_COLOR[p.hub.seg]
+    };
+  });
+
+  // Find hovered hub first so we can highlight its connected routes
+  hoveredHub = null;
+  let minHoverDist = 24;
+  Q.forEach(q => {
+    if (!q.active) return;
+    const d = Math.hypot(q.x - ptrCanvasX, q.y - ptrCanvasY);
+    if (d < minHoverDist && q.z > -0.35) {
+      minHoverDist = d;
+      hoveredHub = q;
+    }
+  });
+
+  // 4. Draw Network Lanes & Animated Parcel Packets
+  EDGES.forEach(edge => {
+    const a = Q[edge.i];
+    const b = Q[edge.j];
+    const bothActive = a.active && b.active;
+    const isConnectedToHover = hoveredHub && (hoveredHub.idx === a.idx || hoveredHub.idx === b.idx);
+    const isConnectedToSelected = (a.hub.id === selectedHubId || b.hub.id === selectedHubId);
+
+    const baseAlpha = bothActive ? (0.12 + 0.26 * ((a.z + b.z + 2) / 4)) : 0.04;
+    g.strokeStyle = isConnectedToHover
+      ? 'rgba(0, 102, 204, 0.85)'
+      : isConnectedToSelected
+      ? 'rgba(0, 102, 204, 0.45)'
+      : `rgba(15, 23, 42, ${baseAlpha})`;
+    g.lineWidth = isConnectedToHover ? 1.9 : 1.05;
+    g.beginPath();
+    g.moveTo(a.x, a.y);
+    g.lineTo(b.x, b.y);
+    g.stroke();
+
+    if (bothActive && !calm) {
+      edge.progress = (edge.progress + edge.speed) % 1;
+      const px = a.x + (b.x - a.x) * edge.progress;
+      const py = a.y + (b.y - a.y) * edge.progress;
+      g.fillStyle = b.c;
+      g.beginPath();
+      g.arc(px, py, 2.4, 0, Math.PI * 2);
+      g.fill();
+    }
+  });
+
+  // 5. Render 24 Hub Nodes (Sorted Back-to-Front) with High-Contrast Dark Labels & White Halo
+  const sorted = [...Q].sort((a, b) => a.z - b.z);
+  sorted.forEach(q => {
+    const depthFactor = (q.z + 1) / 2;
+    const alpha = q.active ? (0.42 + 0.58 * depthFactor) : 0.15;
+    const isSelected = q.hub.id === selectedHubId;
+    const isHovered = hoveredHub && hoveredHub.idx === q.idx;
+    const radius = (isSelected || isHovered ? 4.8 : 3.2) + 5.8 * q.s * q.s;
+
+    g.globalAlpha = alpha;
+
+    // Pulsing outer ring for the 4 mislabeled hubs or currently selected hub
+    if ((q.hub.mismatch || isSelected) && q.active) {
+      g.strokeStyle = isSelected ? '#0066cc' : q.c;
+      g.lineWidth = isSelected ? 2.2 : 1.5;
+      g.beginPath();
+      g.arc(q.x, q.y, radius + 4.5 + Math.sin(pulseTime) * 1.6, 0, Math.PI * 2);
+      g.stroke();
+    }
+
+    // Crisp white & dark slate ring border for contrast on light sphere
+    g.fillStyle = '#ffffff';
+    g.beginPath();
+    g.arc(q.x, q.y, radius + 1.8, 0, Math.PI * 2);
+    g.fill();
+
+    // Colored hub core
+    g.fillStyle = q.c;
+    g.beginPath();
+    g.arc(q.x, q.y, radius, 0, Math.PI * 2);
+    g.fill();
+
+    // High-contrast dark ink city label with white halo on front-most or selected hubs
+    if (q.active && (q.z > 0.25 || isSelected || isHovered)) {
+      g.font = `${isSelected || isHovered ? '800' : '700'} 11.5px Inter, sans-serif`;
+      g.lineJoin = 'round';
+      g.strokeStyle = 'rgba(255, 255, 255, 0.96)';
+      g.lineWidth = 3.5;
+      g.strokeText(q.hub.city, q.x + radius + 5, q.y + 3.8);
+      g.fillStyle = isSelected || isHovered ? '#0055b3' : '#0f172a';
+      g.fillText(q.hub.city, q.x + radius + 5, q.y + 3.8);
+    }
+  });
+
+  // 6. Update Floating Tooltip (Dark Ink on Crisp White Card)
+  if (hoveredHub) {
+    const h = hoveredHub.hub;
+    tip.innerHTML = `<strong style="color:${hoveredHub.c}">${h.id} · ${h.city}</strong> <span style="color:#334155">| Tier ${h.tier} → <b style="color:#0f172a">${h.seg}</b> (${h.delay}% delay)${h.mismatch ? ' ⚠' : ''}</span>`;
+    tip.style.left = `${ptrClientX}px`;
+    tip.style.top = `${ptrClientY}px`;
+    tip.style.opacity = '1';
+  } else {
+    tip.style.opacity = '0';
+  }
+
+  g.globalAlpha = 1;
+  requestAnimationFrame(drawGlobe);
+}
+drawGlobe();
+
+/* =========================================================
+   TINY INTERACTIVE ROBOT COMPANION (FOLLOW, LAND, EVADE)
+   ========================================================= */
+const botEl = $('#mini-bot');
+const botBubble = $('#bot-bubble');
+const botEyes = $('#bot-eyes');
+const botEyeL = $('#bot-eye-l');
+const botEyeR = $('#bot-eye-r');
+const botLed = $('#bot-led');
+const botModeBtn = $('#bot-mode-btn');
+
+let mouseX = innerWidth * 0.72;
+let mouseY = innerHeight * 0.28;
+let lastMouseX = mouseX, lastMouseY = mouseY;
+let mouseSpeed = 0;
+let lastMoveTime = performance.now();
+
+let botX = innerWidth * 0.82;
+let botY = innerHeight * 0.18;
+let botVx = 0, botVy = 0;
+// Modes: 'follow', 'perch', 'evade'
+let botState = 'follow';
+let botLockedMode = 'auto'; // 'auto', 'follow', 'perch', 'evade'
+let evadeTimer = 0;
+let bubbleTimer = 0;
+
+function showBotBubble(text, dur = 2000) {
+  botBubble.textContent = text;
+  botBubble.classList.add('show');
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => botBubble.classList.remove('show'), dur);
+}
+
+function triggerEvade(msg = 'Whoa! Running away >_<') {
+  botState = 'evade';
+  botEl.classList.remove('perched');
+  evadeTimer = performance.now() + 2600;
+  // Pick a playful dart-away velocity away from the cursor
+  const angle = Math.atan2(botY - mouseY, botX - mouseX) + (Math.random() - 0.5) * 0.9;
+  botVx = Math.cos(angle) * 14;
+  botVy = Math.sin(angle) * 14;
+  botLed.setAttribute('fill', '#ff453a');
+  botEyeL.setAttribute('fill', '#ff9f0a');
+  botEyeR.setAttribute('fill', '#ff9f0a');
+  showBotBubble(msg, 2200);
+}
+
+addEventListener('pointermove', e => {
+  const dx = e.clientX - lastMouseX;
+  const dy = e.clientY - lastMouseY;
+  mouseSpeed = Math.hypot(dx, dy);
+  lastMouseX = mouseX = e.clientX;
+  lastMouseY = mouseY = e.clientY;
+  lastMoveTime = performance.now();
+
+  // If perched and cursor moves noticeably, take off smoothly
+  if (botState === 'perch' && mouseSpeed > 5 && botLockedMode === 'auto') {
+    botState = 'follow';
+    botEl.classList.remove('perched');
+    botLed.setAttribute('fill', '#38bdf8');
+    botEyeL.setAttribute('fill', '#38bdf8');
+    botEyeR.setAttribute('fill', '#38bdf8');
+  }
+
+  // If cursor lunges very fast right at the robot, startle and run away!
+  const distToBot = Math.hypot(mouseX - botX, mouseY - botY);
+  if (botLockedMode === 'auto' && botState !== 'evade' && distToBot < 58 && mouseSpeed > 28 && Math.random() < 0.45) {
+    triggerEvade('Whoa! Running away >_<');
+  }
+});
+
+// Clicking / Poking the robot makes it playfully dart away or cycle
+botEl.addEventListener('click', e => {
+  e.stopPropagation();
+  if (botState !== 'evade') {
+    triggerEvade('Haha, can’t catch me! 💨');
+  } else {
+    botState = 'follow';
+    showBotBubble('Back on patrol! 🤖', 1800);
+  }
+});
+
+// Navbar button cycles robot behavior mode
+const BOT_MODES = ['auto', 'follow', 'perch', 'evade'];
+botModeBtn.addEventListener('click', () => {
+  const nextIdx = (BOT_MODES.indexOf(botLockedMode) + 1) % BOT_MODES.length;
+  botLockedMode = BOT_MODES[nextIdx];
+  const labelMap = {
+    auto: '🤖 Bot: Auto',
+    follow: '🤖 Bot: Follow',
+    perch: '🤖 Bot: Land on Cursor',
+    evade: '🤖 Bot: Run Away!'
+  };
+  botModeBtn.querySelector('span').textContent = labelMap[botLockedMode];
+  if (botLockedMode === 'evade') {
+    triggerEvade('Catch me if you can! ⚡');
+  } else if (botLockedMode === 'perch') {
+    botState = 'perch';
+    showBotBubble('Landing on your cursor! ^‿^', 2200);
+  } else {
+    botState = 'follow';
+    botEl.classList.remove('perched');
+    showBotBubble('Following your lead! 🛰️', 2000);
+  }
+});
+
+function animateBot(now) {
+  const dx = mouseX - botX;
+  const dy = mouseY - botY;
+  const dist = Math.hypot(dx, dy);
+  const idleTime = now - lastMoveTime;
+
+  // Periodic spontaneous playful zoomie in auto mode
+  if (botLockedMode === 'auto' && botState === 'follow' && Math.random() < 0.0008) {
+    triggerEvade(' playful zoomies! ✨');
+  }
+
+  if (botLockedMode === 'evade' || (botState === 'evade' && now < evadeTimer)) {
+    // Run away from cursor if cursor gets within 240px, while staying inside screen bounds
+    if (dist < 240) {
+      const ang = Math.atan2(botY - mouseY, botX - mouseX);
+      botVx += Math.cos(ang) * 1.35;
+      botVy += Math.sin(ang) * 1.35;
+    }
+    // Keep away from screen edges
+    const pad = 60;
+    if (botX < pad) botVx += 1.5;
+    if (botX > innerWidth - pad) botVx -= 1.5;
+    if (botY < pad) botVy += 1.5;
+    if (botY > innerHeight - pad) botVy -= 1.5;
+
+    botVx *= 0.90;
+    botVy *= 0.90;
+    botX += botVx;
+    botY += botVy;
+  } else {
+    if (botState === 'evade' && now >= evadeTimer) {
+      botState = 'follow';
+      botLed.setAttribute('fill', '#0066dc');
+      botEyeL.setAttribute('fill', '#38bdf8');
+      botEyeR.setAttribute('fill', '#38bdf8');
+      showBotBubble('Curious again... 👀', 1600);
+    }
+
+    // Decide whether to land right on the cursor or hover beside it
+    const shouldPerch = botLockedMode === 'perch' || (botLockedMode === 'auto' && idleTime > 650 && dist < 85);
+
+    if (shouldPerch) {
+      if (botState !== 'perch') {
+        botState = 'perch';
+        botEl.classList.add('perched');
+        botLed.setAttribute('fill', '#159947');
+        botEyeL.setAttribute('fill', '#2ee59d');
+        botEyeR.setAttribute('fill', '#2ee59d');
+        showBotBubble('Perched on cursor ^‿^', 1800);
+      }
+      // Land right atop the cursor tip
+      const targetX = mouseX;
+      const targetY = mouseY - 24;
+      botVx = (targetX - botX) * 0.18;
+      botVy = (targetY - botY) * 0.18;
+      botX += botVx;
+      botY += botVy;
+    } else {
+      // Follow smoothly with gentle spring offset & bobbing
+      const bob = Math.sin(now * 0.005) * 6;
+      const targetX = mouseX + 34;
+      const targetY = mouseY - 28 + bob;
+      botVx += (targetX - botX) * 0.018;
+      botVy += (targetY - botY) * 0.018;
+      botVx *= 0.82;
+      botVy *= 0.82;
+      botX += botVx;
+      botY += botVy;
+    }
+  }
+
+  // Banking tilt based on horizontal velocity
+  const bankDeg = Math.max(-24, Math.min(24, botVx * 2.2));
+  botEl.style.transform = `translate3d(${(botX - 27).toFixed(1)}px, ${(botY - 27).toFixed(1)}px, 0) rotate(${bankDeg.toFixed(1)}deg)`;
+
+  // Move robot eyes toward cursor
+  const eyeAng = Math.atan2(dy, dx);
+  const eyeDist = Math.min(2.8, dist * 0.03);
+  const ex = Math.cos(eyeAng) * eyeDist;
+  const ey = Math.sin(eyeAng) * eyeDist;
+  botEyes.setAttribute('transform', `translate(${ex.toFixed(1)}, ${ey.toFixed(1)})`);
+
+  requestAnimationFrame(animateBot);
+}
+if (!calm) requestAnimationFrame(animateBot);
+
+/* =========================================================
+   INTERACTIVE LIVE DISPATCH TELEMETRY SIMULATOR LOGIC
+   ========================================================= */
+const simHubSelect = $('#sim-hub');
+HUBS_DATA.forEach(h => {
+  const opt = document.createElement('option');
+  opt.value = h.id;
+  opt.textContent = `${h.id} — ${h.city} (${h.region}) · Official Tier ${h.tier} · Actual: ${h.seg}${h.mismatch ? ' [MISMATCH]' : ''}`;
+  simHubSelect.appendChild(opt);
+});
+simHubSelect.value = 'HUB13';
+
+let simState = {
+  hubId: 'HUB13',
+  service: 'Standard',
+  pay: 'Prepaid',
+  dist: 315,
+  stops: 70,
+  rain: false,
+  sale: false,
+  weekend: false
+};
+
+const BASE_HOURS = { Express: 10, Standard: 28, Economy: 58 };
+const PROMISED_HOURS = { Express: 36, Standard: 60, Economy: 96 };
+const HUB_EFFECT = [0, 2, 4];
+
+function updateSimulator() {
+  const hub = HUBS_DATA.find(h => h.id === simState.hubId) || HUBS_DATA[0];
+  const promised = PROMISED_HOURS[simState.service];
+  const base = BASE_HOURS[simState.service];
+  const hubEff = HUB_EFFECT[hub.opTier - 1];
+
+  const estHours = (
+    base +
+    0.03 * simState.dist +
+    0.10 * simState.stops +
+    hubEff +
+    0.12 * 1.83 +
+    (simState.rain ? 4 : 0) +
+    (simState.sale ? 7 : 0) +
+    (simState.pay === 'COD' ? 3 : 0) +
+    (simState.weekend ? 2 : 0) +
+    (simState.sale && simState.service === 'Express' ? 12 : 0) +
+    (simState.dist > 400 && simState.rain ? 8 : 0)
+  );
+
+  const diff = estHours - promised;
+  const prob = 1 / (1 + Math.exp(-diff / 2.65));
+  const flagged = prob >= 0.50 ? 1 : 0;
+
+  const segBadge = $('#sim-hub-badge');
+  segBadge.textContent = `${hub.seg} Segment (Tier ${hub.tier})`;
+  segBadge.style.color = SEG_COLOR[hub.seg];
+
+  $('#sim-sla-lbl').textContent = `${promised}h Promise`;
+  $('#sim-pay-lbl').textContent = simState.pay;
+  $('#sim-dist-val').textContent = `${simState.dist} km`;
+  $('#sim-stops-val').textContent = `${simState.stops} stops`;
+
+  const activeConds = [
+    simState.rain ? 'Rain' : null,
+    simState.sale ? 'Sale Event' : null,
+    simState.weekend ? 'Weekend' : null
+  ].filter(Boolean);
+  $('#sim-cond-lbl').textContent = activeConds.length ? activeConds.join(' + ') : 'Normal Conditions';
+
+  $('#sim-hours-out').textContent = `${estHours.toFixed(1)}h`;
+  const probEl = $('#sim-prob-out');
+  probEl.textContent = `${(prob * 100).toFixed(1)}%`;
+  probEl.style.color = flagged ? (hub.seg === 'Escalate' ? 'var(--r)' : 'var(--o)') : 'var(--g)';
+
+  const flagPill = $('#sim-flag-pill');
+  flagPill.textContent = `FLAGGED = ${flagged}`;
+  flagPill.style.color = flagged ? 'var(--r)' : 'var(--g)';
+
+  const margin = promised - estHours;
+  $('#sim-explain').textContent = margin >= 0
+    ? `Promised SLA is ${promised}h (${simState.service}). Predicted arrival leaves a +${margin.toFixed(1)}h buffer.`
+    : `Promised SLA is ${promised}h (${simState.service}). Shipment is projected to breach SLA by ${Math.abs(margin).toFixed(1)}h.`;
+
+  const actionBox = $('#sim-action-box');
+  const actionText = $('#sim-action-text');
+  if (flagged === 1 && hub.seg === 'Escalate') {
+    actionText.textContent = 'Escalate to hub manager';
+    actionBox.style.color = 'var(--r)';
+    actionBox.style.background = 'rgba(255, 69, 58, 0.12)';
+  } else if (flagged === 1) {
+    actionText.textContent = 'Proactive customer call';
+    actionBox.style.color = 'var(--o)';
+    actionBox.style.background = 'rgba(255, 159, 10, 0.12)';
+  } else {
+    actionText.textContent = 'No action';
+    actionBox.style.color = 'var(--g)';
+    actionBox.style.background = 'rgba(47, 209, 88, 0.12)';
+  }
+}
+
+simHubSelect.addEventListener('change', e => {
+  simState.hubId = e.target.value;
+  const h = HUBS_DATA.find(x => x.id === simState.hubId);
+  if (h) selectHubForInspector(h);
+  updateSimulator();
+});
+
+$$('#sim-service .t-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('#sim-service .t-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    simState.service = btn.dataset.val;
+    updateSimulator();
+  });
+});
+
+$$('#sim-pay .t-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('#sim-pay .t-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    simState.pay = btn.dataset.val;
+    updateSimulator();
+  });
+});
+
+$('#sim-dist').addEventListener('input', e => {
+  simState.dist = +e.target.value;
+  updateSimulator();
+});
+
+$('#sim-stops').addEventListener('input', e => {
+  simState.stops = +e.target.value;
+  updateSimulator();
+});
+
+[
+  ['#sim-rain', 'rain'],
+  ['#sim-sale', 'sale'],
+  ['#sim-weekend', 'weekend']
+].forEach(([sel, key]) => {
+  $(sel).addEventListener('click', e => {
+    simState[key] = !simState[key];
+    e.currentTarget.classList.toggle('active', simState[key]);
+    updateSimulator();
+  });
+});
+
+updateSimulator();
+
+/* =========================================================
+   TERMINAL COPY & SIMULATED PIPELINE EXECUTION
+   ========================================================= */
+$('#cp').onclick = e => {
+  const rawText = $('#code').innerText.replace(/ +#.*$/gm, '').trim();
+  const btn = e.currentTarget;
+  const done = () => {
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => (btn.textContent = 'Copy Commands'), 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(rawText).then(done).catch(() => fallbackCopy(rawText, done));
+  } else {
+    fallbackCopy(rawText, done);
+  }
+};
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  cb();
+}
+
+const PIPELINE_LOGS = [
+  "[1/7] $ python generate_data.py  -->  24 1224 48 (hubs.csv, raw_shipments.csv, new_shipments.csv written)",
+  "[2/7] $ python part_a_clean_eda.py  -->  Data (Part A): Deduped 1,200 rows | 278 delayed (23.17%)",
+  "[3/7] $ python part_b_regression.py  -->  Hours (Part B): Split 840/180/180 | Final Test R²=0.949 (RMSE 4.15h)",
+  "[4/7] $ python part_c_classification.py  -->  Alerts (Part C): Top 7 features | Threshold=0.50 | Test Recall=0.756",
+  "[5/7] $ python part_d_segments.py  -->  Hubs (Part D): K=3 clusters | 4 tier mismatches identified",
+  "[6/7] $ python package_model.py  -->  Saved models/delay_model.pkl | Reload probability diff = 0.0",
+  "[7/7] $ python predict_delay.py  -->  Scored 48 new parcels -> outputs/new_shipment_actions.csv [ALL CHECKS PASSED ✓]"
+];
+
+let simRunning = false;
+$('#sim-run-btn').addEventListener('click', () => {
+  if (simRunning) return;
+  simRunning = true;
+  const logBox = $('#term-log');
+  logBox.innerHTML = '';
+  logBox.classList.add('open');
+  PIPELINE_LOGS.forEach((line, idx) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.textContent = line;
+      logBox.appendChild(div);
+      if (idx === PIPELINE_LOGS.length - 1) simRunning = false;
+    }, idx * 420);
+  });
+});
+</script>
+</body>
+</html>
